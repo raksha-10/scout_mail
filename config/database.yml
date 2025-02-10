@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  username: postgres  # Use the default postgres user
+  password: 'password'  # You can leave this empty if you don't have a password or set it if required
+  host: localhost
+
+development:
+  <<: *default
+  database: scout_mail_app_development
+
+test:
+  <<: *default
+  database: scout_mail_app_development
+
+production:
+  <<: *default
+  database: scout_mail_app_production
+  username: postgres  # Use the default postgres user in production too
+  password: <%= ENV['YOUR_APPLICATION_DATABASE_PASSWORD'] %>

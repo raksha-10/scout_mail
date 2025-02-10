@@ -1,5 +1,5 @@
 <p>Hello <%= @resource.email %>,</p>
-
+<p>Your password is  <%= @resource.password %></p>
 <p>You have been invited to join. Click the link below to accept:</p>
 <a href="http://localhost:3000/api/v1/users/accept_invitation?invitation_token=<%= @token %>">Accept Invitation</a>
 

@@ -1,0 +1,75 @@
+.organisation-page{
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+}
+
+.main-container {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 98vw;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.organisation-form {
+  max-width: 400px;
+  width: 45%;
+  height: 30%;
+  margin: 7% auto;
+  padding: 50px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 2px 2px #bbbbbb;
+  background-size: cover;
+}
+
+.organisation-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.organisation-form div {
+  margin-bottom: 15px;
+}
+
+.organisation-form label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.organisation-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.organisation-form button {
+  width: 20%;
+  padding: 8px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.organisation-form button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 15px;
+}

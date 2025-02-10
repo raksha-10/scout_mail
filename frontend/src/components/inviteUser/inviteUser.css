@@ -1,0 +1,65 @@
+.inviteUser-page {
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+}
+
+.inviteUser-form {
+  max-width: 400px;
+  width: 45%;
+  height: 95%;
+  /* margin: 7% auto; */
+  padding: 50px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 2px 2px 2px 2px #bbbbbb;
+  background-size: cover;
+  margin-top: 10%;
+}
+
+.inviteUser-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.inviteUser-form div {
+  margin-bottom: 15px;
+}
+
+.inviteUser-form label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  text-align: left;
+  color: black;
+}
+
+.inviteUser-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.inviteUser-form button {
+  width: 26%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.inviteUser-form button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 15px;
+}

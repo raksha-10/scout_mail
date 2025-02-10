@@ -4,7 +4,7 @@ default: &default
   pool: 5
   username: postgres  # Use the default postgres user
   password: 'password'  # You can leave this empty if you don't have a password or set it if required
-  host: localhost
+  host: postgres
 
 development:
   <<: *default

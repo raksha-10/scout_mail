@@ -90,17 +90,23 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+
+      - name: Debug Running Services
+        run: |
+          echo "Checking running services..."
+          docker ps -a
+
        
       - name: Wait for PostgreSQL
         run: |
           echo "Waiting for PostgreSQL to be ready..."
-          for i in {1..10}; do
-            if pg_isready -h postgres -p 5432 -U postgres; then
+          for i in {1..20}; do  # Increase retries
+            if PGPASSWORD=password psql -h postgres -U postgres -d postgres -c "SELECT 1"; then
               echo "PostgreSQL is ready!"
               exit 0
             fi
             echo "PostgreSQL not ready yet... waiting..."
-            sleep 3
+            sleep 5  # Increase wait time
           done
           echo "PostgreSQL failed to start."
           exit 1

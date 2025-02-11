@@ -1,4 +1,5 @@
 class Api::V1::UsersController < ApplicationController
+    before_action :authenticate_user!
     skip_before_action :authenticate_user!, only: [:accept_invitation]
 
     def invite_user
@@ -11,21 +12,18 @@ class Api::V1::UsersController < ApplicationController
       # Check if the role exists, otherwise return an error
       role = Role.find_by(name: params[:role])
       return render json: { error: 'Invalid role provided.' }, status: :unprocessable_entity unless role
-    
       # Invite the user and send an email
       user = User.invite!(
         email: params[:email],
         name: params[:name], # Assuming 'name' is a column in User
         password: params[:password] # If password is optional, Devise Invitable will generate one
       )
-    
       # Associate the user with the organisation and assign them the selected role
       user_organisation = UserOrganisation.create(
         user: user,
         organisation: @organisation,
         role: role
       )
-    
       if user_organisation.persisted?
         render json: { message: 'Invite sent successfully.' }, status: :created
       else
@@ -39,7 +37,7 @@ class Api::V1::UsersController < ApplicationController
   
       if user
         user.accept_invitation!
-        render json: { message: "Invitation accepted. Please log in." }, status: :ok
+        render json: { redirect_url: "http://localhost:3000/login" }, status: :ok
       else
         render json: { error: "Invalid or expired invitation token" }, status: :unprocessable_entity
       end

@@ -14,12 +14,6 @@ class User < ApplicationRecord
   def has_role?(role_name, organisation)
     user_organisations.exists?(organisation: organisation, role: Role.find_by(name: role_name))
   end
-  
-  def deliver_invitation
-    super do |invitable|
-      invitable.invitation_url = "http://localhost:3000/invitation-accept?invitation_token=#{invitable.raw_invitation_token}"
-    end
-  end
 
   private
   

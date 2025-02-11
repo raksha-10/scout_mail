@@ -354,7 +354,6 @@ Devise.setup do |config|
   config.responder.error_status = :unprocessable_entity
   config.responder.redirect_status = :see_other
   config.mailer_sender = 'raksha.b@goldeneagle.ai'
-  config.invitation_redirect_url = 'http://localhost:3000/login'  
 
   # ==> Configuration for :registerable
 
@@ -364,7 +363,7 @@ Devise.setup do |config|
   config.responder.error_status = :unprocessable_entity
   config.responder.redirect_status = :see_other
   config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.devise_jwt_secret_key!
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY'] || Rails.application.credentials.devise_jwt_secret_key!
 
     jwt.dispatch_requests = [
       ['POST', %r{^/login$}]

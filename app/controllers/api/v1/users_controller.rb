@@ -37,8 +37,8 @@ class Api::V1::UsersController < ApplicationController
         current_user.image.purge if current_user.image.attached?
         current_user.image.attach(user_params[:image])
       end
-
-      render json: { message: "User updated successfully", user: current_user.as_json(only: [:id, :name, :email,:linkedin_url,:mobile]), organisation: current_user.organisation }, status: :ok
+      image_url = url_for(current_user.image) if current_user.image.attached?
+      render json: { message: "User updated successfully", user: current_user.as_json(only: [:id, :name, :email,:linkedin_url,:mobile]),image_url: image_url, organisation: current_user.organisation }, status: :ok
     else
       render json: { error: current_user.errors.full_messages }, status: :unprocessable_entity
     end

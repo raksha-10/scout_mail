@@ -18,9 +18,9 @@ module ScoutMailApp
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+    config.action_mailer.default_url_options = { host: 'localhost', port: 3001 }
     config.action_mailer.default_options = {
-      from: 'raksha.b@goldeneagle.ai'
+      from: 'harshitshreshthi8@gmail.com'
     }
   end
 end

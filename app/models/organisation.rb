@@ -1,6 +1,7 @@
 class Organisation < ApplicationRecord
 	# has_many :user_organisations
 	has_many :users
+	belongs_to :organisation_type
 	# has_many :user_invitations, dependent: :destroy
 	validates :name, presence: true, uniqueness: { case_sensitive: false, message: "Organisation name must be unique" }
 	validates :organisation_type, presence: true

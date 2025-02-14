@@ -3,23 +3,14 @@
 class Users::SessionsController < Devise::SessionsController
   include RackSessionsFix
   respond_to :json
-  before_action :authenticate_user!, only: [:destroy]
-  skip_before_action :verify_signed_out_user, only: [:destroy]
-
-  def destroy
-    if current_user
-      current_user.update!(jti: SecureRandom.uuid) # Invalidate JWT by changing the jti
-      head :no_content
-    else
-      render json: { error: "User not found" }, status: :unauthorized
-    end
-  end
+  # before_action :authenticate_user!, only: [:destroy]
+  # skip_before_action :verify_signed_out_user, only: [:destroy]
 
   def create
     user = User.find_by(email: params[:user][:email])
     if user&.valid_password?(params[:user][:password])
       if user.activated?
-        render json: { token: user.generate_jwt_token, message: "Login successful" }, status: :ok
+        render json: { token: user.generate_jwt_token, message: "Login successful", user: user }, status: :ok
       else
         render json: { error: "Account not activated. Please verify OTP." }, status: :unauthorized
       end

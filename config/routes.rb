@@ -18,7 +18,10 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :users, only: [:update]
+      get 'users/show', to: 'users#show_current_user'
       get 'organisations/organisation_types', to: 'organisations#organisation_types'
+      resources :organisations, only: [:show, :update]
     end
   end
 end

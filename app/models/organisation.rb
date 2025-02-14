@@ -1,11 +1,12 @@
 class Organisation < ApplicationRecord
-	# has_many :user_organisations
 	has_many :users
 	belongs_to :organisation_type
-	# has_many :user_invitations, dependent: :destroy
-	validates :name, presence: true, uniqueness: { case_sensitive: false, message: "Organisation name must be unique" }
-	validates :organisation_type, presence: true
-	validates :company_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" }, allow_blank: true
-	validates :linkedin_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" }, allow_blank: true
   
-end
+	validates :name, presence: true, uniqueness: { case_sensitive: false, message: "Organisation name must be unique" }
+	validates :organisation_type, presence: true	
+	validates :facebook_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" }, allow_blank: true, uniqueness: { case_sensitive: false, message: "Facebook URL must be unique" }
+	validates :twitter_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" }, allow_blank: true, uniqueness: { case_sensitive: false, message: "Twitter URL must be unique" }
+	validates :linkedin_url, format: { with: URI::DEFAULT_PARSER.make_regexp, message: "must be a valid URL" }, allow_blank: true, uniqueness: { case_sensitive: false, message: "LinkedIn URL must be unique" }
+
+  end
+  

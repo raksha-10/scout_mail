@@ -3,18 +3,32 @@
 class Users::SessionsController < Devise::SessionsController
   include RackSessionsFix
   respond_to :json
+  before_action :authenticate_user!, only: [:destroy]
+  skip_before_action :verify_signed_out_user, only: [:destroy]
 
-  # def create
-  #   self.resource = User.find_by(email: params[:user][:email])
-  #   if resource.nil? || !resource.valid_password?(params[:user][:password])
-  #     render json: {
-  #       status: { message: 'Invalid credentials. Please check your email and password.' }
-  #     }, status: :unauthorized
-  #     return
-  #   end
-  #   sign_in(resource_name, resource)
-  #   respond_with(resource)
-  # end
+  def destroy
+    if current_user
+      current_user.update!(jti: SecureRandom.uuid) # Invalidate JWT by changing the jti
+      head :no_content
+    else
+      render json: { error: "User not found" }, status: :unauthorized
+    end
+  end
+
+  def create
+    user = User.find_by(email: params[:user][:email])
+    if user&.valid_password?(params[:user][:password])
+      if user.activated?
+        render json: { token: user.generate_jwt_token, message: "Login successful" }, status: :ok
+      else
+        render json: { error: "Account not activated. Please verify OTP." }, status: :unauthorized
+      end
+    else
+      render json: { error: "Invalid email or password" }, status: :unauthorized
+    end
+  end  
+  
+
   private
   def respond_with(resource, _opts = {})
     if resource.present? && resource.persisted?

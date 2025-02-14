@@ -33,7 +33,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
         name: params[:user][:name],
         email: params[:user][:email],
         password: params[:user][:password],
-        mobile: params[:user][:mobile],
         organisation_id: organisation.id,
         role_id: Role.find_by(name: 'Owner')&.id,
         activated: false
@@ -56,7 +55,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if otp_record
       user = otp_record.user  
       if user.update(activated: true)
-        render json: { message: 'Account activated successfully', token: user.generate_jwt_token, user: user }, status: :ok
+        render json: { message: 'Account activated successfully', token: user.generate_jwt_token, user: user.as_json(only: [:id, :name, :email]),organisation: user.organisation }, status: :ok
       else
         render json: { error: "Failed to activate account" }, status: :unprocessable_entity
       end
@@ -78,7 +77,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     private
 
     def sign_up_params
-      params.require(:user).permit(:name, :email, :password, :mobile, :role_id)
+      params.require(:user).permit(:name, :email, :password,  :role_id)
     end
   
     def respond_with(current_user, _opts = {})

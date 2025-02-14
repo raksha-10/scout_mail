@@ -17,14 +17,28 @@ class ApplicationController < ActionController::Base
 
   def authenticate_user!
     token = request.headers['Authorization']&.split(' ')&.last
-    return render json: { error: 'Token missing or invalid' }, status: :unauthorized if token.blank?
+    if token.blank?
+      return render json: { error: 'Token missing' }, status: :unauthorized
+    end
   
     begin
-      decoded_token = JWT.decode(token, Rails.application.credentials.devise_jwt_secret_key, true, { algorithm: 'HS256' })
-      user_id = decoded_token[0]['sub']
-      @current_user = User.find_by(id: user_id)
-    rescue JWT::DecodeError, ActiveRecord::RecordNotFound
-      render json: { error: 'Token invalid or user not found' }, status: :unauthorized
+      secret_key = Rails.application.credentials.secret_key_base
+      decoded_token = JWT.decode(token, secret_key, true, { algorithm: 'HS256' }).first
+  
+      user = User.find_by(id: decoded_token['user_id'])
+  
+      # Ensure user exists and check if jti matches
+      if user.nil? || user.jti != decoded_token['jti']
+        return render json: { error: 'Token invalid or expired' }, status: :unauthorized
+      end
+  
+      @current_user = user
+    rescue JWT::ExpiredSignature
+      render json: { error: 'Token expired' }, status: :unauthorized
+    rescue JWT::DecodeError
+      render json: { error: 'Token invalid' }, status: :unauthorized
     end
   end
+  
+  
 end

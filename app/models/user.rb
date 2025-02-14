@@ -27,6 +27,12 @@ class User < ApplicationRecord
     secret_key = Rails.application.credentials.secret_key_base || ENV['SECRET_KEY_BASE']
     JWT.encode(payload, secret_key)
   end
+
+  def generate_otp
+    otp = rand(100000..999999) # Generate 6-digit OTP
+    Otp.create!(user_id: id, code: otp, expires_at: 10.minutes.from_now)
+    otp
+  end
   
   private
 

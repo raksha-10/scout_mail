@@ -1,5 +1,5 @@
 class UserMailer < ApplicationMailer
-    default from: 'raksha.b@goldeneagle.ai' # Change to your sender email
+    default from: 'harshitshreshthi8@gmail.com' # Change to your sender email
   
     def send_otp(user, otp)
       @user = user

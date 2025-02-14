@@ -1,13 +1,14 @@
 require 'jwt'
 class User < ApplicationRecord
-
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   include Devise::JWT::RevocationStrategies::JTIMatcher
   devise :invitable, :database_authenticatable, :registerable, :recoverable,
   :rememberable, :validatable, :jwt_authenticatable,
   jwt_revocation_strategy: self
-
+  
+  validates :mobile, presence: true, uniqueness: { case_sensitive: false }, format: { with: /\A\d{10}\z/, message: "must be exactly 10 digits" } 
+  before_save :normalize_mobile_number
   # has_many :user_organisations
   # has_many :organisations, through: :user_organisations
   has_many :roles
@@ -26,11 +27,12 @@ class User < ApplicationRecord
     secret_key = Rails.application.credentials.secret_key_base || ENV['SECRET_KEY_BASE']
     JWT.encode(payload, secret_key)
   end
-
-  
   
   private
 
+  def normalize_mobile_number
+    self.mobile = mobile.gsub(/\D/, '') # Remove non-numeric characters
+  end
 
   def generate_jti
     self.jti ||= SecureRandom.uuid # Or any other logic to generate the jti

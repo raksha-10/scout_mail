@@ -47,8 +47,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
       user.update!(activated: true)
       otp_record.destroy # OTP used, so remove it
   
-      token = generate_jwt_token(user) # Generate authentication token
-  
       render json: { message: 'Account activated successfully', token: user.generate_jwt_token, user: user }, status: :ok
     else
       render json: { error: 'Invalid or expired OTP' }, status: :unprocessable_entity
@@ -74,7 +72,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     # Send OTP to email
     UserMailer.send_otp(user, otp).deliver_later 
 
-    render json: { message: 'New OTP sent to email' }, status: :ok
+    render json: { message: 'New OTP sent to email' , user_id: user.id}, status: :ok
   end
 
     private

@@ -1,47 +1,65 @@
 require 'open-uri'
+require 'base64'
 class Api::V1::UsersController < ApplicationController
   before_action :authenticate_user!, except: [:accept_invitation, :otp_password_set]
 
   def show_current_user
     if @current_user
+      base64_image = nil
+      if @current_user.image.attached?
+        image_blob = @current_user.image.blob
+        # Optionally, process/resize the image before downloading if needed.
+        image_data = @current_user.image.download
+        encoded_image = Base64.strict_encode64(image_data)
+        base64_image = "data:#{image_blob.content_type};base64,#{encoded_image}"
+      end
+  
       render json: {
         id: @current_user.id,
         name: @current_user.name,
         email: @current_user.email,
         role: @current_user.role.name,
         linkedin_url: @current_user.linkedin_url,
-        image_url: @current_user.image.attached? ? url_for(@current_user.image) : nil, 
+        image_url: @current_user.image.attached? ? url_for(@current_user.image) : nil,
+        image_base64: base64_image,
         organisation: @current_user.organisation
       }, status: :ok
     else
       render json: { error: "User not found" }, status: :unauthorized
     end
   end
-   
+  
   def update
     begin
-      if params[:user][:image].present? && params[:user][:image].start_with?("http")
-        downloaded_image = URI.open(params[:user][:image])
-        
-        filename = URI.parse(params[:user][:image]).path.split("/").last.presence || "profile.jpg"
-        content_type = downloaded_image.content_type || "image/jpeg"
-        current_user.image.purge if current_user.image.attached?
-        current_user.image.attach(io: downloaded_image, filename: filename, content_type: content_type)
+      # Handle image upload (Base64 or URL)
+      if params[:user][:image].present?
+        image_data = params[:user][:image]
+
+        if image_data.start_with?("http")
+          attach_remote_image(image_data)
+        elsif image_data.start_with?("data:image")
+          attach_base64_image(image_data)
+        end
       end
     rescue StandardError => e
-      return render json: { error: "Failed to download image: #{e.message}" }, status: :unprocessable_entity
+      return render json: { error: "Image upload failed: #{e.message}" }, status: :unprocessable_entity
     end
+
+    # Update user attributes excluding image (already handled)
     if current_user.update(user_params.except(:image))
-      if user_params[:image].present?
-        current_user.image.purge if current_user.image.attached?
-        current_user.image.attach(user_params[:image])
-      end
-      image_url = url_for(current_user.image) if current_user.image.attached?
-      render json: { message: "User updated successfully", user: current_user.as_json(only: [:id, :name, :email,:linkedin_url,:mobile]),image_url: image_url, organisation: current_user.organisation }, status: :ok
+      base64_image = current_user.image.attached? ? generate_base64_image(current_user.image) : nil
+
+      render json: {
+        message: "User updated successfully",
+        user: current_user.as_json(only: [:id, :name, :email, :linkedin_url, :mobile]),
+        image_base64: base64_image,
+        organisation: current_user.organisation
+      }, status: :ok
     else
       render json: { error: current_user.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
 
   def invite_user
     organisation_id = current_user.organisation.id
@@ -123,12 +141,45 @@ class Api::V1::UsersController < ApplicationController
     private
 
     def user_params
-      params.require(:user).permit(:name, :mobile, :linkedin_url)
+      params.require(:user).permit(:name, :mobile, :linkedin_url, :image)
     end
 
     def user_create_params
       params.require(:user).permit(:name, :mobile, :email, :role_id)
     end
+
+    def attach_remote_image(image_url)
+      downloaded_image = URI.open(image_url)
+      filename = File.basename(URI.parse(image_url).path) || "profile.jpg"
+      content_type = downloaded_image.content_type || "image/jpeg"
+  
+      current_user.image.purge if current_user.image.attached?
+      current_user.image.attach(io: downloaded_image, filename: filename, content_type: content_type)
+    end
+  
+    # Handle Base64 Image Upload
+    def attach_base64_image(base64_string)
+      format, data = base64_string.split(',')
+      ext = format.match(/image\/(\w+);base64/)[1]
+      decoded_data = Base64.decode64(data)
+  
+      filename = "profile.#{ext}"
+      io = StringIO.new(decoded_data)
+  
+      current_user.image.purge if current_user.image.attached?
+      current_user.image.attach(io: io, filename: filename, content_type: "image/#{ext}")
+    end
+  
+    # Generate Base64-Encoded Image from ActiveStorage
+    def generate_base64_image(image)
+      return nil unless image.attached?
+  
+      blob = image.blob
+      image_data = blob.download
+      base64_data = Base64.strict_encode64(image_data)
+      "data:#{blob.content_type};base64,#{base64_data}"
+    end
+  
    
   end
   

@@ -20,8 +20,14 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users, only: [:update]
       get 'users/show', to: 'users#show_current_user'
+      post 'users/delete_invited_user', to: 'users#delete_invited_user'
+      get 'users/invited_users', to: 'users#invited_users'
+      post 'users/invite_user', to: 'users#invite_user'
+      get 'users/accept_invitation', to: 'users#accept_invitation'
+      get 'users/otp_password_set', to: 'users#otp_password_set'
       get 'organisations/organisation_types', to: 'organisations#organisation_types'
       resources :organisations, only: [:show, :update]
+      resources :roles, only: [:index]
     end
   end
 end

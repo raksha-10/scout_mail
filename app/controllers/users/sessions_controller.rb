@@ -4,6 +4,9 @@ class Users::SessionsController < Devise::SessionsController
   include RackSessionsFix
   respond_to :json
   skip_before_action :authenticate_user!, only: [:create]
+  skip_before_action :verify_authenticity_token, only: [:destroy]
+  skip_before_action :verify_signed_out_user, only: :destroy
+
 
   def create
     user = User.find_by(email: params[:user][:email])
@@ -17,8 +20,11 @@ class Users::SessionsController < Devise::SessionsController
     else
       render json: { error: "Invalid email or password" }, status: :unauthorized
     end
-  end  
+  end 
   
+  def destroy
+    respond_to_on_destroy
+  end
 
   private
   def respond_with(resource, _opts = {})
@@ -35,21 +41,26 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   def respond_to_on_destroy
-    if request.headers['Authorization'].present?
-      jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, Rails.application.credentials.devise_jwt_secret_key!).first
-      current_user = User.find(jwt_payload['sub'])
+    token = request.headers['Authorization']&.split(' ')&.last
+    current_user = nil
+  
+    if token.present?
+      begin
+        secret_key = Rails.application.credentials.secret_key_base
+        jwt_payload = JWT.decode(token, secret_key, true, { algorithm: 'HS256' }).first
+        current_user = User.find(jwt_payload['user_id'])
+        current_user.update(jti: SecureRandom.uuid)
+      rescue JWT::VerificationError, JWT::DecodeError => e
+        # Token is invalid or signature verification failed
+        Rails.logger.error("JWT error: #{e.message}")
+        current_user = nil
+      end
     end
-
     if current_user
-      render json: {
-        status: 200,
-        message: 'Logged out successfully.'
-      }, status: :ok
+      render json: { status: 200, message: 'Logged out successfully.' }, status: :ok
     else
-      render json: {
-        status: 401,
-        message: "Couldn't find an active session."
-      }, status: :unauthorized
+      render json: { status: 401, message: "Couldn't find an active session." }, status: :unauthorized
     end
   end
+  
 end

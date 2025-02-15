@@ -6,5 +6,13 @@ class UserMailer < ApplicationMailer
       @otp = otp
       mail(to: @user.email, subject: 'Your OTP Code')
     end
-  end
+
+
+    def send_activation_email(user)
+      @user = user
+      @activation_token = @user.activation_token
+      @activation_url = "http://localhost:3001/api/v1/users/accept_invitation?token=#{@activation_token}"
   
+      mail(to: @user.email, subject: 'Activate Your Account')
+    end
+  end

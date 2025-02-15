@@ -13,7 +13,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       if existing_user&.activated == false
         Otp.where(user_id: existing_user.id).update_all(expires_at: Time.current)
         otp = existing_user.generate_otp
-        UserMailerUtils.send_otp_email(existing_user, otp)  
+        existing_user.send_otp_email(otp)
         return render json: { message: 'Otp has been sent to your email, Please verify your account', user_id: existing_user.id }, status: :ok
       elsif existing_user
         return render json: { error: 'User already exists and is verified' }, status: :unprocessable_entity
@@ -45,7 +45,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   
       # Send OTP
       otp = user.generate_otp
-      UserMailerUtils.send_otp_email(user, otp)  
+      user.send_otp_email(otp)  
       render json: { message: 'OTP sent to email', user_id: user.id }, status: :ok
     end
   end
@@ -69,7 +69,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     return render json: { error: "User not found" }, status: :not_found if user.nil? 
     Otp.where(user_id: user.id).update_all(expires_at: Time.current)
     otp = user.generate_otp
-    UserMailerUtils.send_otp_email(user, otp)
+    user.send_otp_email(otp) 
     render json: { message: 'New OTP sent to email', user_id: user.id }, status: :ok
   end
   

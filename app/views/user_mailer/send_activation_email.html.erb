@@ -1,0 +1,5 @@
+<p>Hello <%= @user.name %>,</p>
+<p>Please activate your account by clicking</p> 
+<a href="http://localhost:3001/api/v1/users/accept_invitation?invitation_token=<%= @activation_token %>" style="color: blue; text-decoration: underline;">Activate</a>
+<p>OTP will be sent to your email</p>
+<p>Thanks,<br>Your App Team</p>

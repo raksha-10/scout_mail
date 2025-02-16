@@ -111,10 +111,8 @@ class Api::V1::UsersController < ApplicationController
       Otp.where(user_id: user.id).update_all(expires_at: Time.current)
       otp = user.generate_otp
       user.send_otp_email(otp)
-      frontend_url = "https://yourfrontend.com/verify-otp?user_id=#{user.id}"
+      frontend_url = "http://localhost:3000/otpConfirm?user_id=#{user.id}"
       redirect_to frontend_url
-    else
-      redirect_to "https://yourfrontend.com/invalid-token"
     end
   end
 

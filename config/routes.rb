@@ -24,7 +24,7 @@ Rails.application.routes.draw do
       get 'users/invited_users', to: 'users#invited_users'
       post 'users/invite_user', to: 'users#invite_user'
       get 'users/accept_invitation', to: 'users#accept_invitation'
-      get 'users/otp_password_set', to: 'users#otp_password_set'
+      post 'users/otp_password_set', to: 'users#otp_password_set'
       get 'organisations/organisation_types', to: 'organisations#organisation_types'
       resources :organisations, only: [:show, :update]
       resources :roles, only: [:index]

@@ -5,12 +5,16 @@ module Api
       before_action :set_organisation, only: [:show, :update]
 
       def show
-        render json: { organisation: @organisation }, status: :ok
+        render json: { organisation: OrganisationSerializer.new(@organisation).serializable_hash[:data][:attributes] }, status: :ok
       end
+      
 
       def update
         if @organisation.update(organisation_params)
-          render json: { message: 'Organisation updated successfully', organisation: @organisation }, status: :ok
+          render json: {
+            message: 'Organisation updated successfully',
+            organisation: OrganisationSerializer.new(@organisation).serializable_hash[:data][:attributes]
+          }, status: :ok
         else
           render json: { errors: @organisation.errors.full_messages }, status: :unprocessable_entity
         end
@@ -21,7 +25,6 @@ module Api
       end
 
       def organisations
-        # Get all organisations the current user is linked to, along with their role
         user_organisation = @current_user.organisation
     
         organisations_with_roles = user_organisations.map do |user_org|

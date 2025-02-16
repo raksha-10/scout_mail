@@ -3,7 +3,7 @@ class User < ApplicationRecord
   has_one_attached :image
 
   include Devise::JWT::RevocationStrategies::JTIMatcher
-  devise :invitable, :database_authenticatable, :registerable, :recoverable,
+  devise  :database_authenticatable, :registerable, :recoverable,
   :rememberable, :validatable, :jwt_authenticatable,
   jwt_revocation_strategy: self
 
@@ -47,15 +47,18 @@ class User < ApplicationRecord
     UserMailerUtils.send_activation_email(self)
   end
 
-  def invited_users_with_status
-    active_invited_users = invited_users.where(deactivate: false) 
-    active_invited_users.map do |user|
-      user_data = user.as_json(only: [:id, :name, :email])
-      user_data[:role] = user.role.name if user.role.present?
-      user_data[:status] = user.invitation_accepted_at.nil? ? 'pending' : 'accepted'
-      user_data
-    end
+  def activate_account
+    update_columns(deactivated_at: nil)
   end
+
+  def deactivate_account
+    update_columns(deactivated_at: Time.current)
+  end
+  
+  def has_role?(role_name)
+    role&.name == role_name
+  end
+  
 
   private
 

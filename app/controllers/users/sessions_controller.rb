@@ -7,20 +7,30 @@ class Users::SessionsController < Devise::SessionsController
   skip_before_action :verify_authenticity_token, only: [:destroy]
   skip_before_action :verify_signed_out_user, only: :destroy
 
-
   def create
     user = User.find_by(email: params[:user][:email])
+  
     if user&.valid_password?(params[:user][:password])
+      if user.deactivated_at.present?
+        return render json: { error: "Your account has been deactivated. Please contact support." }, status: :unauthorized
+      end
+  
       if user.activated?
         user.update(jti: SecureRandom.uuid)
-        return render json: { token: user.generate_jwt_token, message: "Login successful", user: user.as_json(only: [:id, :name, :email]), organisation: user.organisation}, status: :ok
+        return render json: {
+          token: user.generate_jwt_token,
+          message: "Login successful",
+          user: UserSerializer.new(user).serializable_hash[:data][:attributes],
+          organisation: OrganisationSerializer.new(user.organisation).serializable_hash[:data][:attributes]
+        }, status: :ok
       else
         render json: { error: "Account not activated. Please verify OTP." }, status: :unauthorized
       end
     else
       render json: { error: "Invalid email or password" }, status: :unauthorized
     end
-  end 
+  end
+  
   
   def destroy
     respond_to_on_destroy

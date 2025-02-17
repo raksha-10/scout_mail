@@ -4,7 +4,7 @@ class Api::V1::UsersController < ApplicationController
   before_action :authenticate_user!, except: [:accept_invitation, :otp_password_set]
   before_action :set_user, only: [:toggle_user_status]
   before_action :set_organisation, only: [:invite_user, :resend_invite]
-  before_action :authorize_owner_or_admin, only: [:toggle_user_status]
+  before_action :authorize_owner_or_admin, only: [:toggle_user_status, :invite_user, :resend_invite]
 
   def show_current_user
     if @current_user
@@ -70,9 +70,8 @@ class Api::V1::UsersController < ApplicationController
 
   def invited_users
     active_invited_users = User.where(
-      invited_by: current_user, 
       organisation_id: current_user.organisation_id
-    )
+    ).where.not(id: current_user.id)
     render json: InvitedUserSerializer.new(active_invited_users).serializable_hash, status: :ok
   end
 
